@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penilaian Harian 1 - Matriks (XI SIJA)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- KaTeX for rendering mathematical formulas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .matrix-bracket {
+            position: relative;
+            padding: 0 8px;
+        }
+        .matrix-bracket::before, .matrix-bracket::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            border: 2px solid #3b82f6;
+        }
+        .matrix-bracket::before {
+            left: 0;
+            border-right: none;
+            border-radius: 6px 0 0 6px;
+        }
+        .matrix-bracket::after {
+            right: 0;
+            border-left: none;
+            border-radius: 0 6px 6px 0;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between selection:bg-blue-500 selection:text-white">
+
+    <!-- Header Bar -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <i class="fa-solid fa-square-root-variable text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-wide">PENILAIAN HARIAN 1 MATRIKS</h1>
+                    <p class="text-xs text-slate-400">Kelas XI SIJA &bull; Kurikulum Merdeka</p>
+                </div>
+            </div>
+            
+            <!-- Timer & Action Container -->
+            <div id="top-timer-container" class="hidden flex items-center space-x-4">
+                <div class="flex items-center bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <i class="fa-regular fa-clock text-amber-400 mr-2"></i>
+                    <span id="timer-display" class="font-mono text-lg font-semibold text-amber-400">90:00</span>
+                </div>
+                <button onclick="confirmSubmission()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg font-medium text-sm transition-all flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Kirim Jawaban</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- SCREEN 1: START EXAM MODAL / FORM -->
+        <section id="start-screen" class="max-w-lg mx-auto my-8 bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-600 rounded-full mb-3 text-2xl">
+                    <i class="fa-solid fa-user-pen"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">Ujian Online Matriks</h2>
+                <p class="text-sm text-slate-500 mt-1">Silakan lengkapi identitas Anda sebelum memulai ujian.</p>
+            </div>
+
+            <form id="identity-form" onsubmit="startExam(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Nama Lengkap</label>
+                    <input type="text" id="student-name" required placeholder="Contoh: Ahmad Rizky" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Kelas</label>
+                        <select id="student-class" required class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800 bg-white">
+                            <option value="">-- Pilih Kelas --</option>
+                            <option value="XI SIJA 1">XI SIJA 1</option>
+                            <option value="XI SIJA 2">XI SIJA 2</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">No. Absen</label>
+                        <input type="number" id="student-absent" min="1" max="50" required placeholder="15" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-800">
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800 space-y-1 mt-4">
+                    <p class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-info"></i> Informasi Ujian:</p>
+                    <p>&bull; Waktu Mengerjakan: <strong>90 Menit</strong></p>
+                    <p>&bull; Jumlah Soal: <strong>10 Soal Isian Singkat</strong></p>
+                    <p>&bull; Skala Nilai Maksimum: <strong>100 Poin</strong></p>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all shadow-md mt-4 flex items-center justify-center gap-2">
+                    <span>Mulai Pengerjaan Ujian</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </section>
+
+        <!-- SCREEN 2: EXAM INTERFACE -->
+        <section id="exam-screen" class="hidden space-y-6">
+            
+            <!-- Student Banner & Progress -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <span class="text-xs text-slate-400 font-semibold uppercase">Peserta Ujian</span>
+                    <h3 id="display-student-info" class="font-bold text-slate-800">Ahmad Rizky (XI SIJA 1 / 15)</h3>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 font-semibold uppercase">Progres Terjawab</span>
+                        <p id="progress-text" class="font-bold text-blue-600">0 dari 10 Soal</p>
+                    </div>
+                    <div class="w-32 bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200">
+                        <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORMAT GUIDANCE BOX (As Requested) -->
+            <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-xl shadow-sm space-y-2">
+                <div class="flex items-center gap-2 text-blue-900 font-bold text-sm">
+                    <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                    <span>PETUNJUK PENGISIAN JAWABAN ISIAN SINGKAT:</span>
+                </div>
+                <ul class="text-xs text-slate-700 space-y-1.5 pl-5 list-disc">
+                    <li>Isikan jawaban pada kolom input yang telah disediakan.</li>
+                    <li><strong class="text-slate-800">Jawaban Angka:</strong> Ketikkan berupa angka bulat atau desimal (misal contoh format: <span class="bg-blue-100 px-1.5 py-0.5 rounded text-blue-800 font-mono">12</span> atau <span class="bg-blue-100 px-1.5 py-0.5 rounded text-blue-800 font-mono">-8</span> <span class="text-slate-500 text-[11px] font-semibold italic">[Bukan Jawaban Soal]</span>).</li>
+                    <li><strong class="text-slate-800">Jawaban Ordo:</strong> Ketikkan dengan format <span class="bg-blue-100 px-1.5 py-0.5 rounded text-blue-800 font-mono">2x3</span> atau <span class="bg-blue-100 px-1.5 py-0.5 rounded text-blue-800 font-mono">3 x 4</span> <span class="text-slate-500 text-[11px] font-semibold italic">[Bukan Jawaban Soal]</span>.</li>
+                    <li><strong class="text-slate-800">Jawaban Matriks:</strong> Isi setiap kotak elemen angka matriks sesuai urutannya.</li>
+                    <li><em class="text-slate-500">Catatan: Nilai contoh format di atas hanyalah panduan penulisan dan <strong>Bukan Jawaban</strong> dari soal ujian ini. Kolom jawaban Anda telah disiapkan bersih dan kosong.</em></li>
+                </ul>
+            </div>
+
+            <!-- Questions Form -->
+            <form id="questions-form" class="space-y-6">
+                
+                <!-- Q1 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md">Soal 1 &bull; 10 Poin</span>
+                    </div>
+                    <div class="text-slate-800 font-medium space-y-2">
+                        <p>Diberikan matriks:</p>
+                        <div class="my-2 py-2 overflow-x-auto text-lg flex items-center gap-2">
+                            <span>\( A = \)</span>
+                            <span>\( \begin{pmatrix} 2 & -3 & 5 & 1 \\ 0 & 4 & -1 & 6 \\ -7 & 8 & 3 & -2 \end{pmatrix} \)</span>
+                        </div>
+                        <p>Tentukan nilai dari \( a_{23} - a_{32} + a_{14} \) !</p>
+                    </div>
+                    <div class="pt-2">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Jawaban Anda (Angka):</label>
+                        <input type="text" name="q1" oninput="updateProgress()" placeholder="Format: Angka" class="w-full sm:w-64 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium">
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md">Soal 2 &bull; 10 Poin</span>
+                    </div>
+                    <div class="text-slate-800 font-medium space-y-2">
+                        <p>Matriks \( B \) berordo \( 3 \times 4 \) dan matriks \( C \) berordo \( 4 \times 2 \).</p>
+                        <p>Ordo matriks hasil transpose dari \( (BC)^T \) adalah ...</p>
+                    </div>
+                    <div class="pt-2">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Jawaban Anda (Format Ordo: baris x kolom):</label>
+                        <input type="text" name="q2" oninput="updateProgress()" placeholder="Format: AxB (misal: 2x3)" class="w-full sm:w-64 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium">
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md">Soal 3 &bull; 10 Poin</span>
+                    </div>
+                    <div class="text-slate-800 font-medium space-y-3">
+                        <p>Pasangkan jenis-jenis matriks berikut dengan kode contoh yang sesuai!</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm font-mono">
+                            <div>(i) \( \begin{pmatrix}1&0&0\\ -3&4&0\\ 6&7&-9\end{pmatrix} \)</div>
+                            <div>(ii) \( \begin{pmatrix}2&-3&5\\ 0&4&-6\\ 0&0&7\end{pmatrix} \)</div>
+                            <div>(iii) \( \begin{pmatrix}2&0&0\\ 0&2&0\\ 0&0&2\end{pmatrix} \)</div>
+                            <div>(iv) \( \begin{pmatrix}1&0&0\\ 0&1&0\\ 0&0&1\end{pmatrix} \)</div>
+                            <div>(v) \( \begin{pmatrix}1 & 0 & 2\end{pmatrix} \)</div>
+                            <div>(vi) \( \begin{pmatrix}3\\ -6\end{pmatrix} \)</div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                            <div class="bg-slate-100 p-3 rounded-lg border border-slate-200">
+                                <label class="block text-xs font-bold text-slate-700 mb-1">a. Matriks baris</label>
+                                <input type="text" name="q3a" oninput="updateProgress()" placeholder="Kode: i / ii / iii / iv / v / vi" class="w-full px-3 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 text-sm">
+                            </div>
+                            <div class="bg-slate-100 p-3 rounded-lg border border-slate-200">
+                                <label class="block text-xs font-bold text-slate-700 mb-1">b. Matriks identitas</label>
+                                <input type="text" name="q3b" oninput="updateProgress()" placeholder="Kode: i / ii / iii / iv / v / vi" class="w-full px-3 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 text-sm">
+                            </div>
+                            <div class="bg-slate-100 p-3 rounded-lg border border-slate-200">
+                                <label class="block text-xs font-bold text-slate-700 mb-1">c. Matriks segitiga atas</label>
+                                <input type="text" name="q3c" oninput="updateProgress()" placeholder="Kode: i / ii / iii / iv / v / vi" class="w-full px-3 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 text-sm">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md">Soal 4 &bull; 10 Poin</span>
+                    </div>
+                    <div class="text-slate-800 font-medium space-y-2">
+                        <p>Diketahui matriks:</p>
+                        <div class="my-2 py-1 text-lg flex items-center gap-4 flex-wrap">
+                            <span>\( D = \begin{pmatrix} 2a & 4 \\ -3 & 5 \end{pmatrix} \)</span>
+                            <span>dan</span>
+                            <span>\( E = \begin{pmatrix} 6 & c \\ a+b & 5 \end{pmatrix} \)</span>
+                        </div>
+                        <p>Jika \( D = E^T \), maka nilai dari \( a + b - c \) adalah ...</p>
+                    </div>
+                    <div class="pt-2">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Jawaban Anda (Angka):</label>
+                        <input type="text" name="q4" oninput="updateProgress()" placeholder="Format: Angka" class="w-full sm:w-64 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium">
+                    </div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md">Soal 5 &bull; 10 Poin</span>
+                    </div>
+                    <div class="text-slate-800 font-medium space-y-2">
+                        <p>Diketahui matriks:</p>
+                        <div class="my-2 py-1 text-base flex items-center gap-3 flex-wrap">
+                            <span>\( P = \begin{pmatrix} 3 & -2 \\ 1 & 4 \end{pmatrix} \),</span>
+                            <span>\( Q = \begin{pmatrix} 1 & 5 \\ 2 & -3 \end{pmatrix} \),</span>
+                            <span>dan \( R = \begin{pmatrix} 4 & 1 \\ -2 & 0 \end{pmatrix} \)</span>
+                        </div>
+                        <p>Hasil dari \( 2P - Q + R \) adalah matriks berordo \( 2 \times 2 \):</p>
+                    </div>
+                    <div class="pt-2">
+                        <label class="block text-xs font-semibold text-slate-500 mb-2">Jawaban Matriks Anda (Isi elemen sel angka):</label>
+                        <div class="inline-block bg-slate-50 p-4 rounded-xl border border-slate-300">
+                            <div class="matrix-bracket grid grid-cols-2 gap-3 w-48">
+                                <input type="text" name="q5_11" oninput="updateProgress()" placeholder="a11" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                                <input type="text" name="q5_12" oninput="updateProgress()" placeholder="a12" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                                <input type="text" name="q5_21" oninput="updateProgress()" placeholder="a21" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                                <input type="text" name="q5_22" oninput="updateProgress()" placeholder="a22" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q6 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md">Soal 6 &bull; 10 Poin</span>
+                    </div>
+                    <div class="text-slate-800 font-medium space-y-2">
+                        <p>Diketahui matriks \( P = \begin{pmatrix} 3 & -2 \\ 1 & 4 \end{pmatrix} \) dan \( R = \begin{pmatrix} 4 & 1 \\ -2 & 0 \end{pmatrix} \).</p>
+                        <p>Hasil dari perkalian matriks \( RP \) adalah ...</p>
+                    </div>
+                    <div class="pt-2">
+                        <label class="block text-xs font-semibold text-slate-500 mb-2">Jawaban Matriks Anda (Isi elemen sel angka):</label>
+                        <div class="inline-block bg-slate-50 p-4 rounded-xl border border-slate-300">
+                            <div class="matrix-bracket grid grid-cols-2 gap-3 w-48">
+                                <input type="text" name="q6_11" oninput="updateProgress()" placeholder="a11" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                                <input type="text" name="q6_12" oninput="updateProgress()" placeholder="a12" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                                <input type="text" name="q6_21" oninput="updateProgress()" placeholder="a21" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                                <input type="text" name="q6_22" oninput="updateProgress()" placeholder="a22" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q7 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md">Soal 7 &bull; 10 Poin</span>
+                    </div>
+                    <div class="text-slate-800 font-medium space-y-2">
+                        <p>Nilai determinan dari matriks \( M = \begin{pmatrix} 1 & 2 & 3 \\ 0 & 4 & -1 \\ 2 & -1 & 1 \end{pmatrix} \) adalah ...</p>
+                    </div>
+                    <div class="pt-2">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Jawaban Anda (Angka):</label>
+                        <input type="text" name="q7" oninput="updateProgress()" placeholder="Format: Angka" class="w-full sm:w-64 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium">
+                    </div>
+                </div>
+
+                <!-- Q8 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md">Soal 8 &bull; 10 Poin</span>
+                    </div>
+                    <div class="text-slate-800 font-medium space-y-2">
+                        <p>Jika matriks \( F = \begin{pmatrix} 4 & -2 \\ -3 & 2 \end{pmatrix} \), maka matriks invers \( F^{-1} \) adalah ...</p>
+                    </div>
+                    <div class="pt-2">
+                        <label class="block text-xs font-semibold text-slate-500 mb-2">Jawaban Matriks Invers Anda (Bisa desimal atau pecahan misal: 1.5 atau 3/2):</label>
+                        <div class="inline-block bg-slate-50 p-4 rounded-xl border border-slate-300">
+                            <div class="matrix-bracket grid grid-cols-2 gap-3 w-56">
+                                <input type="text" name="q8_11" oninput="updateProgress()" placeholder="a11" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                                <input type="text" name="q8_12" oninput="updateProgress()" placeholder="a12" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                                <input type="text" name="q8_21" oninput="updateProgress()" placeholder="a21" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                                <input type="text" name="q8_22" oninput="updateProgress()" placeholder="a22" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q9 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md">Soal 9 &bull; 10 Poin</span>
+                    </div>
+                    <div class="text-slate-800 font-medium space-y-2">
+                        <p>Diketahui matriks \( S = \begin{pmatrix} x+3 & 4 \\ 3 & 2 \end{pmatrix} \).</p>
+                        <p>Jika matriks \( S \) merupakan <strong>matriks singular</strong>, maka nilai \( x \) adalah ...</p>
+                    </div>
+                    <div class="pt-2">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Jawaban Anda (Angka):</label>
+                        <input type="text" name="q9" oninput="updateProgress()" placeholder="Format: Angka" class="w-full sm:w-64 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium">
+                    </div>
+                </div>
+
+                <!-- Q10 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-md">Soal 10 &bull; 10 Poin</span>
+                    </div>
+                    <div class="text-slate-800 font-medium space-y-2">
+                        <p>Diketahui persamaan matriks \( \begin{pmatrix} 2 & 1 \\ 3 & 2 \end{pmatrix} X = \begin{pmatrix} 4 & -1 \\ 1 & 3 \end{pmatrix} \).</p>
+                        <p>Matriks \( X_{2 \times 2} \) yang memenuhi persamaan tersebut adalah ...</p>
+                    </div>
+                    <div class="pt-2">
+                        <label class="block text-xs font-semibold text-slate-500 mb-2">Jawaban Matriks Anda (Isi elemen sel angka):</label>
+                        <div class="inline-block bg-slate-50 p-4 rounded-xl border border-slate-300">
+                            <div class="matrix-bracket grid grid-cols-2 gap-3 w-48">
+                                <input type="text" name="q10_11" oninput="updateProgress()" placeholder="a11" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                                <input type="text" name="q10_12" oninput="updateProgress()" placeholder="a12" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                                <input type="text" name="q10_21" oninput="updateProgress()" placeholder="a21" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                                <input type="text" name="q10_22" oninput="updateProgress()" placeholder="a22" class="w-full text-center py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 font-bold">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button Bar -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 text-center">
+                    <button type="button" onclick="confirmSubmission()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-md transition-all text-base inline-flex items-center gap-2">
+                        <i class="fa-solid fa-check-circle text-xl"></i>
+                        <span>Selesaikan & Kirim Ujian</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- SCREEN 3: RESULT & SCORE SUMMARY -->
+        <section id="result-screen" class="hidden max-w-3xl mx-auto space-y-6">
+            <div class="bg-white p-8 rounded-2xl shadow-xl border border-slate-200 text-center space-y-6">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full text-3xl">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Hasil Penilaian Harian</h2>
+                    <p id="result-student-info" class="text-slate-500 text-sm mt-1">Siswa: -</p>
+                </div>
+
+                <!-- Big Score Gauge -->
+                <div class="bg-slate-900 text-white p-6 rounded-2xl max-w-sm mx-auto shadow-inner space-y-1">
+                    <span class="text-xs uppercase tracking-widest text-slate-400 font-semibold">NILAI AKHIR</span>
+                    <div id="final-score" class="text-6xl font-extrabold text-amber-400 font-mono">0</div>
+                    <span class="text-xs text-slate-400">Skala Maksimum 100</span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-left pt-2">
+                    <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+                        <span class="text-xs text-emerald-700 font-bold uppercase block">Jawaban Benar</span>
+                        <span id="correct-count" class="text-2xl font-bold text-emerald-800">0 Soal</span>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-200 p-4 rounded-xl">
+                        <span class="text-xs text-rose-700 font-bold uppercase block">Jawaban Salah</span>
+                        <span id="wrong-count" class="text-2xl font-bold text-rose-800">0 Soal</span>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1 bg-slate-50 border border-slate-200 p-4 rounded-xl">
+                        <span class="text-xs text-slate-600 font-bold uppercase block">Waktu Digunakan</span>
+                        <span id="time-spent" class="text-2xl font-bold text-slate-800">00:00</span>
+                    </div>
+                </div>
+
+                <!-- Detailed Breakdown Table -->
+                <div class="text-left pt-4 space-y-3">
+                    <h3 class="font-bold text-slate-800 text-lg border-b pb-2">Rincian Hasil Pengerjaan:</h3>
+                    <div id="breakdown-container" class="space-y-3">
+                        <!-- Injected via JavaScript -->
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t">
+                    <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg transition-all text-sm inline-flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Kerjakan Ulang / Sesi Baru</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-center text-xs py-4 border-t border-slate-800">
+        <p>&copy; 2026 Penilaian Harian Matriks - XI SIJA. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // State Variables
+        let timerInterval = null;
+        let timeRemaining = 90 * 60; // 90 minutes in seconds
+        let startTime = null;
+        let studentData = {};
+
+        // Official Answer Keys for Automatic Scoring
+        const ANSWER_KEYS = {
+            q1: "-8",
+            q2: ["2x3", "2 x 3", "2X3", "2 X 3"],
+            q3a: ["v", "(v)", "5"],
+            q3b: ["iv", "(iv)", "4"],
+            q3c: ["ii", "(ii)", "2"],
+            q4: "7",
+            q5: { a11: "9", a12: "-8", a21: "-2", a22: "11" },
+            q6: { a11: "13", a12: "-4", a21: "-6", a22: "4" },
+            q7: "-25",
+            q8: { a11: ["1", "1.0"], a12: ["1", "1.0"], a21: ["1.5", "3/2"], a22: ["2", "2.0"] },
+            q9: "3",
+            q10: { a11: "7", a12: "-5", a21: "-10", a22: "9" }
+        };
+
+        // Initialize KaTeX Math rendering
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '\\(', right: '\\)', display: false},
+                    {left: '\\[', right: '\\]', display: true}
+                ],
+                throwOnError: false
+            });
+        });
+
+        // Start Exam Function
+        function startExam(e) {
+            e.preventDefault();
+            const name = document.getElementById('student-name').value.trim();
+            const cls = document.getElementById('student-class').value;
+            const absent = document.getElementById('student-absent').value;
+
+            if (!name || !cls || !absent) return;
+
+            studentData = { name, cls, absent };
+            document.getElementById('display-student-info').textContent = `${name} (${cls} / Absen ${absent})`;
+            
+            // Switch Screens
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('exam-screen').classList.remove('hidden');
+            document.getElementById('top-timer-container').classList.remove('hidden');
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Start Countdown Timer
+            startTime = new Date();
+            startTimer();
+        }
+
+        // Timer Logic
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Waktu ujian 90 menit telah habis! Sistem akan mengirimkan jawaban Anda secara otomatis.");
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timeRemaining / 60);
+            const secs = timeRemaining % 60;
+            const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            document.getElementById('timer-display').textContent = formatted;
+        }
+
+        // Calculate progress percentage
+        function updateProgress() {
+            const form = document.getElementById('questions-form');
+            let answeredCount = 0;
+
+            // Check Q1, Q2, Q4, Q7, Q9
+            ['q1', 'q2', 'q4', 'q7', 'q9'].forEach(q => {
+                if (form[q].value.trim() !== '') answeredCount++;
+            });
+
+            // Check Q3
+            if (form['q3a'].value.trim() !== '' && form['q3b'].value.trim() !== '' && form['q3c'].value.trim() !== '') {
+                answeredCount++;
+            }
+
+            // Check Matrix Q5, Q6, Q8, Q10
+            [5, 6, 8, 10].forEach(qNum => {
+                if (
+                    form[`q${qNum}_11`].value.trim() !== '' &&
+                    form[`q${qNum}_12`].value.trim() !== '' &&
+                    form[`q${qNum}_21`].value.trim() !== '' &&
+                    form[`q${qNum}_22`].value.trim() !== ''
+                ) {
+                    answeredCount++;
+                }
+            });
+
+            document.getElementById('progress-text').textContent = `${answeredCount} dari 10 Soal`;
+            document.getElementById('progress-bar').style.width = `${(answeredCount / 10) * 100}%`;
+        }
+
+        function confirmSubmission() {
+            if (confirm("Apakah Anda yakin ingin mengirimkan seluruh jawaban ujian ini?")) {
+                submitExam();
+            }
+        }
+
+        // Evaluate & Submit Exam
+        function submitExam() {
+            clearInterval(timerInterval);
+            const form = document.getElementById('questions-form');
+            
+            let totalScore = 0;
+            let correctCount = 0;
+            let breakdownHTML = '';
+
+            // Helper normalization function
+            const clean = (str) => str.toString().trim().toLowerCase().replace(/\s+/g, '');
+
+            // Grade Q1 (Single Number)
+            const q1Val = clean(form['q1'].value);
+            const q1Correct = q1Val === ANSWER_KEYS.q1;
+            if (q1Correct) { totalScore += 10; correctCount++; }
+            breakdownHTML += createBreakdownCard(1, "Nilai a23 - a32 + a14", form['q1'].value, ANSWER_KEYS.q1, q1Correct);
+
+            // Grade Q2 (Ordo)
+            const q2Val = clean(form['q2'].value);
+            const q2Correct = ANSWER_KEYS.q2.map(clean).includes(q2Val);
+            if (q2Correct) { totalScore += 10; correctCount++; }
+            breakdownHTML += createBreakdownCard(2, "Ordo (BC)^T", form['q2'].value, "2x3", q2Correct);
+
+            // Grade Q3 (Matching)
+            const q3aCorrect = ANSWER_KEYS.q3a.map(clean).includes(clean(form['q3a'].value));
+            const q3bCorrect = ANSWER_KEYS.q3b.map(clean).includes(clean(form['q3b'].value));
+            const q3cCorrect = ANSWER_KEYS.q3c.map(clean).includes(clean(form['q3c'].value));
+            const q3Correct = q3aCorrect && q3bCorrect && q3cCorrect;
+            if (q3Correct) { totalScore += 10; correctCount++; }
+            const userQ3Str = `a: ${form['q3a'].value || '-'}, b: ${form['q3b'].value || '-'}, c: ${form['q3c'].value || '-'}`;
+            breakdownHTML += createBreakdownCard(3, "Menjodohkan Jenis Matriks", userQ3Str, "a: (v), b: (iv), c: (ii)", q3Correct);
+
+            // Grade Q4 (Single Number)
+            const q4Val = clean(form['q4'].value);
+            const q4Correct = q4Val === ANSWER_KEYS.q4;
+            if (q4Correct) { totalScore += 10; correctCount++; }
+            breakdownHTML += createBreakdownCard(4, "Nilai a + b - c", form['q4'].value, ANSWER_KEYS.q4, q4Correct);
+
+            // Grade Q5 (Matrix 2x2)
+            const q5Correct = 
+                clean(form['q5_11'].value) === ANSWER_KEYS.q5.a11 &&
+                clean(form['q5_12'].value) === ANSWER_KEYS.q5.a12 &&
+                clean(form['q5_21'].value) === ANSWER_KEYS.q5.a21 &&
+                clean(form['q5_22'].value) === ANSWER_KEYS.q5.a22;
+            if (q5Correct) { totalScore += 10; correctCount++; }
+            const userQ5Str = `[[${form['q5_11'].value || '?'}, ${form['q5_12'].value || '?'}], [${form['q5_21'].value || '?'}, ${form['q5_22'].value || '?'}]]`;
+            breakdownHTML += createBreakdownCard(5, "Hasil 2P - Q + R", userQ5Str, "[[9, -8], [-2, 11]]", q5Correct);
+
+            // Grade Q6 (Matrix 2x2)
+            const q6Correct = 
+                clean(form['q6_11'].value) === ANSWER_KEYS.q6.a11 &&
+                clean(form['q6_12'].value) === ANSWER_KEYS.q6.a12 &&
+                clean(form['q6_21'].value) === ANSWER_KEYS.q6.a21 &&
+                clean(form['q6_22'].value) === ANSWER_KEYS.q6.a22;
+            if (q6Correct) { totalScore += 10; correctCount++; }
+            const userQ6Str = `[[${form['q6_11'].value || '?'}, ${form['q6_12'].value || '?'}], [${form['q6_21'].value || '?'}, ${form['q6_22'].value || '?'}]]`;
+            breakdownHTML += createBreakdownCard(6, "Hasil Perkalian RP", userQ6Str, "[[13, -4], [-6, 4]]", q6Correct);
+
+            // Grade Q7 (Determinan 3x3)
+            const q7Val = clean(form['q7'].value);
+            const q7Correct = q7Val === ANSWER_KEYS.q7;
+            if (q7Correct) { totalScore += 10; correctCount++; }
+            breakdownHTML += createBreakdownCard(7, "Determinan Matriks M", form['q7'].value, ANSWER_KEYS.q7, q7Correct);
+
+            // Grade Q8 (Invers Matriks 2x2)
+            const q8_11 = clean(form['q8_11'].value);
+            const q8_12 = clean(form['q8_12'].value);
+            const q8_21 = clean(form['q8_21'].value);
+            const q8_22 = clean(form['q8_22'].value);
+            const q8Correct = 
+                ANSWER_KEYS.q8.a11.includes(q8_11) &&
+                ANSWER_KEYS.q8.a12.includes(q8_12) &&
+                ANSWER_KEYS.q8.a21.includes(q8_21) &&
+                ANSWER_KEYS.q8.a22.includes(q8_22);
+            if (q8Correct) { totalScore += 10; correctCount++; }
+            const userQ8Str = `[[${form['q8_11'].value || '?'}, ${form['q8_12'].value || '?'}], [${form['q8_21'].value || '?'}, ${form['q8_22'].value || '?'}]]`;
+            breakdownHTML += createBreakdownCard(8, "Matriks Invers F^-1", userQ8Str, "[[1, 1], [1.5, 2]]", q8Correct);
+
+            // Grade Q9 (Singular Matrix)
+            const q9Val = clean(form['q9'].value);
+            const q9Correct = q9Val === ANSWER_KEYS.q9;
+            if (q9Correct) { totalScore += 10; correctCount++; }
+            breakdownHTML += createBreakdownCard(9, "Nilai x Matriks Singular", form['q9'].value, ANSWER_KEYS.q9, q9Correct);
+
+            // Grade Q10 (Persamaan AX = B)
+            const q10Correct = 
+                clean(form['q10_11'].value) === ANSWER_KEYS.q10.a11 &&
+                clean(form['q10_12'].value) === ANSWER_KEYS.q10.a12 &&
+                clean(form['q10_21'].value) === ANSWER_KEYS.q10.a21 &&
+                clean(form['q10_22'].value) === ANSWER_KEYS.q10.a22;
+            if (q10Correct) { totalScore += 10; correctCount++; }
+            const userQ10Str = `[[${form['q10_11'].value || '?'}, ${form['q10_12'].value || '?'}], [${form['q10_21'].value || '?'}, ${form['q10_22'].value || '?'}]]`;
+            breakdownHTML += createBreakdownCard(10, "Matriks X (Persamaan AX = B)", userQ10Str, "[[7, -5], [-10, 9]]", q10Correct);
+
+            // Calculate Time Spent
+            const endTime = new Date();
+            const elapsedSecs = Math.floor((endTime - startTime) / 1000);
+            const elapsedMins = Math.floor(elapsedSecs / 60);
+            const elapsedRemSecs = elapsedSecs % 60;
+            const timeSpentStr = `${elapsedMins} mnt ${elapsedRemSecs} dtk`;
+
+            // Render Results
+            document.getElementById('result-student-info').textContent = `Siswa: ${studentData.name} | Kelas: ${studentData.cls} | Absen: ${studentData.absent}`;
+            document.getElementById('final-score').textContent = totalScore;
+            document.getElementById('correct-count').textContent = `${correctCount} Soal`;
+            document.getElementById('wrong-count').textContent = `${10 - correctCount} Soal`;
+            document.getElementById('time-spent').textContent = timeSpentStr;
+            document.getElementById('breakdown-container').innerHTML = breakdownHTML;
+
+            // Switch Screen
+            document.getElementById('exam-screen').classList.add('hidden');
+            document.getElementById('top-timer-container').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Helper to format breakdown item
+        function createBreakdownCard(num, title, userAns, keyAns, isCorrect) {
+            const statusBg = isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200';
+            const statusBadge = isCorrect 
+                ? '<span class="bg-emerald-600 text-white text-xs font-bold px-2 py-0.5 rounded"><i class="fa-solid fa-check"></i> BENAR (+10)</span>' 
+                : '<span class="bg-rose-600 text-white text-xs font-bold px-2 py-0.5 rounded"><i class="fa-solid fa-xmark"></i> SALAH (0)</span>';
+
+            return `
+                <div class="p-4 rounded-xl border ${statusBg} text-xs sm:text-sm space-y-1">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-slate-800">Soal ${num}: ${title}</span>
+                        ${statusBadge}
+                    </div>
+                    <div class="text-slate-600 pt-1">
+                        <p><strong>Jawaban Anda:</strong> <span class="font-mono text-slate-800">${userAns || '(Kosong)'}</span></p>
+                        <p><strong>Kunci Jawaban Benar:</strong> <span class="font-mono text-emerald-700 font-bold">${keyAns}</span></p>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
